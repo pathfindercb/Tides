@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,20 +8,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Tides v1.5</title>
+    <title>Tides v2.0</title>
 
-    <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <!-- Custom CSS -->
-    <link href="css/3-col-portfolio.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
 </head>
 <body>
 <?php
@@ -43,7 +37,7 @@ if (isset($_GET['flush'])) {
 include('PAI_Tide.php');
 $tide = new PAI_Tide;
 $tideversion = $tide::version;
-$data = $tide->getTide($zip);
+$data = json_decode($tide->getTide($zip,$flush));
 ?>
 
     <!-- Page Content -->
@@ -54,7 +48,7 @@ $data = $tide->getTide($zip);
             <div class="col-lg-12">
                 <h1 class="page-header">Tides
 					<?php
-					echo ("<small>{$data['city']}\n v{$tideversion}</small>\n");
+					echo ("<small>{$data->Response->Port->port}\n v{$tideversion}</small>\n");
 					?>
                 </h1>
             </div>
@@ -71,11 +65,12 @@ $data = $tide->getTide($zip);
 				echo ("<table border='1' width='90%' >\n");
 				echo ("<tr><th>When</th><th>Type</th><th>Height</th></tr>\n");
 				//now echo to table
-				foreach($data["tide"] as $item) {
+				foreach($data->Response->Tide as $item) {
 					echo("<tr>\n");
-					echo ("<td>{$item[0]}</td>\n");
-					echo("<td>{$item[1]}</td>\n");
-					echo("<td>{$item[2]}</td>\n");
+					$d = gmdate('M-d D H:i',$item->twhen-(5*3600)); //adj to correct tide data
+					echo ("<td>{$d}</td>\n");
+					echo("<td>{$item->what}</td>\n");
+					echo("<td>{$item->feet}</td>\n");
 					echo("</tr>\n");
 				}
 				?>
@@ -89,10 +84,11 @@ $data = $tide->getTide($zip);
 				echo ("<table border='1' width='90%' >\n");
 				echo ("<tr><th>When</th><th>Type</th></tr>\n");
 				//now echo to table
-				foreach($data["sun"] as $item) {
+				foreach($data->Response->Sun as $item) {
 					echo("<tr>\n");
-					echo ("<td>{$item[0]}</td>\n");
-					echo("<td>{$item[1]}</td>\n");
+					$d = date('M-d D H:i',$item->swhen);
+					echo ("<td>{$d}</td>\n");
+					echo("<td>{$item->what}</td>\n");
 					echo("</tr>\n");
 				}
 				?>
@@ -106,10 +102,10 @@ $data = $tide->getTide($zip);
 				echo ("<table border='1' width='90%' >\n");
 				echo ("<tr><th>When</th><th>Forecast</th></tr>\n");
 				//now echo to table
-				foreach($data["fcst"] as $item) {
+				foreach($data->Response->Fcst as $item) {
 					echo("<tr>\n");
-					echo ("<td>{$item[0]}</td>\n");
-					echo("<td>{$item[1]}</td>\n");
+					echo ("<td>{$item->name}</td>\n");
+					echo("<td>{$item->detailedForecast}</td>\n");
 					echo("</tr>\n");
 				}
 				?>
@@ -125,8 +121,8 @@ $data = $tide->getTide($zip);
         <footer>
             <div class="row">
                 <div class="col-md-12">
-                    <p>Data source: <IMG SRC="../images/wundergroundLogo_150_horz.jpg"> at <?php echo (date("Y-m-d h:i:s A",$data['cache']));?> UTC</p>
-                    <p>Copyright &copy; 2018 Pathfinder Associates, Inc.</p>
+                    <p>Data source: <IMG SRC="../images/weathergovicon.jpg"> at <?php echo (gmdate("Y-m-d h:i:s A",$data->Response->Cache));?> UTC</p>
+                    <p>Copyright &copy; 2019 Pathfinder Associates, Inc.</p>
                 </div>
             </div>
             <!-- /.row -->
@@ -134,12 +130,6 @@ $data = $tide->getTide($zip);
 
     </div>
     <!-- /.container -->
-
-    <!-- jQuery -->
-    <script src="js/jquery.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
 
 </body>
 

@@ -1,0 +1,3 @@
+<?php
+$pfolder = '../private/Tides/';
+?>
