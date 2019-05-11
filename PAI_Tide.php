@@ -13,7 +13,7 @@ include('PAI_Cache.php');
 
 abstract class PAI_Tide_Abstract {
 
-	const version = "2.0";
+	const version = "2.1";
 	abstract function getTide($zip);
 
 }
@@ -41,10 +41,10 @@ class PAI_Tide extends PAI_Tide_Abstract {
 		unset($this->pdo);
     }
 
-	function getTide ($zip = "02840",$flush=false) {
+	function getTide ($zip = "34236",$flush=false) {
 		$now = time(); 
 		if (is_null($zip)) {
-			$zip="02840";
+			$zip="34236";
 		}
 		// create cache file for this zipcode
 		$cfile = "wtide" . $zip;
@@ -58,12 +58,12 @@ class PAI_Tide extends PAI_Tide_Abstract {
 			// Fetch failed so now retrieve tide, sunmoon, weather data
 			$pcache->setCache = time();
 			// first get port data
-			$sql = "SELECT port, stationid, zoneid, tzname FROM `ports` where zip = " . $zip ;
+			$sql = "SELECT port, zip, lat, lng, stationid, zoneid, tzname FROM `ports` where zip = " . $zip ;
 			$stmt = $this->pdo->prepare($sql);
 			$stmt->execute();
 			$p = $stmt->fetch(PDO::FETCH_ASSOC);
 			// check if failed
-			if (!$p) {exit;}
+			if (!$p) {return;}
 			
 			// tide 
 			$sql = "SELECT twhen, what, feet FROM `tides` where stationid = " . $p['stationid'] . " AND twhen > " . strtotime('today midnight') . " ORDER BY twhen LIMIT 20";
@@ -117,6 +117,7 @@ class PAI_Tide extends PAI_Tide_Abstract {
 				'Created' => date('Y-m-d'),
 				'Copyright' => 'Copyright 2019 Pathfinder Associates, Inc.',
 				'Author' => 'Chris Barlow',
+				'Cached' =>  gmdate('Y-m-d h:i:s A',$pcache->setCache),
 				'Cache' =>  $pcache->setCache,
 				'Port' => $p,
 				'Tide' => $t,

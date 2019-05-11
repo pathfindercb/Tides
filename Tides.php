@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Tides v2.0</title>
+    <title>Tides v2.1</title>
 
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
@@ -38,6 +38,10 @@ include('PAI_Tide.php');
 $tide = new PAI_Tide;
 $tideversion = $tide::version;
 $data = json_decode($tide->getTide($zip,$flush));
+if (!$data) {
+	echo("Invalid Zip Code");
+	exit;
+	}
 ?>
 
     <!-- Page Content -->
